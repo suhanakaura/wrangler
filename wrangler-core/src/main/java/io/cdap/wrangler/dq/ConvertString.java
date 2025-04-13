@@ -75,9 +75,11 @@ public class ConvertString {
   public ConvertString(String repeatStr) {
     this.repeatChar = repeatStr;
     if (!StringUtils.isEmpty(repeatStr)) {
-      removeRepeatCharPattern = Pattern.compile("(" + repeatStr + ")+");
+      removeRepeatCharPattern = Pattern.compile("(" + Pattern.quote(repeatStr) + ")+");
     }
-    removeWhiteSpacesPattern = Pattern.compile("([\\s\\u0085\\p{Z}])\\1+");
+    removeWhiteSpacesPattern = Pattern.compile(
+            "([\\s\\u0085\\u00A0\\u1680\\u180E\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000])\\1+"
+    );
   }
 
   /**
@@ -93,7 +95,7 @@ public class ConvertString {
       return input;
     }
 
-    String result = input;
+    String result = input.trim();
     while (StringUtils.startsWithAny(result, WHITESPACE_CHARS)) {
       result = StringUtils.removeStart(result, result.substring(0, 1));
     }
@@ -177,5 +179,7 @@ public class ConvertString {
     Matcher matcher = removeWhiteSpacesPattern.matcher(input);
     return matcher.replaceAll("$1");
   }
+
+
 
 }

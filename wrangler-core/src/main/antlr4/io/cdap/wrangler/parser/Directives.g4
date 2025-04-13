@@ -208,6 +208,9 @@ fragment NUMBER: DIGIT+ ('.' DIGIT+)?; // for example, 10, 1.5
 fragment BYTE_UNIT: ('B' | 'KB' | 'MB' | 'GB' | 'TB');
 fragment TIME_UNIT: ('ns' | 'us' | 'ms' | 's' | 'm' | 'h' | 'd');
 
+byteSizeArg : BYTE_SIZE;
+timeDurationArg : TIME_DURATION;
+
 // Tokens
 
 BYTE_SIZE: NUMBER BYTE_UNIT;      // for example, 10KB, 1.5MB
