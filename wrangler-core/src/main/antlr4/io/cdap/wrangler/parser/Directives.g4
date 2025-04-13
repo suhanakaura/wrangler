@@ -139,8 +139,9 @@ numberRange
  : Number ':' Number '=' value
  ;
 
+// adding BYTE_SIZE and TIME_DURATION to value
 value
- : String | Number | Column | Bool
+ : String | Number | Column | Bool | BYTE_SIZE | TIME_DURATION
  ;
 
 ecommand
@@ -199,6 +200,19 @@ identifierList
 /*
  * Following are the Lexer Rules used for tokenizing the recipe.
  */
+
+// fragments for the patterns
+
+fragment DIGIT: [0-9];
+fragment NUMBER: DIGIT+ ('.' DIGIT+)?; // for example, 10, 1.5
+fragment BYTE_UNIT: ('B' | 'KB' | 'MB' | 'GB' | 'TB');
+fragment TIME_UNIT: ('ns' | 'us' | 'ms' | 's' | 'm' | 'h' | 'd');
+
+// Tokens
+
+BYTE_SIZE: NUMBER BYTE_UNIT;      // for example, 10KB, 1.5MB
+TIME_DURATION: NUMBER TIME_UNIT;  // for example, 5ms, 2.1s
+
 OBrace   : '{';
 CBrace   : '}';
 SColon   : ';';
