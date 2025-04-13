@@ -20,6 +20,7 @@ import io.cdap.wrangler.TestingRig;
 import io.cdap.wrangler.api.CompileStatus;
 import io.cdap.wrangler.api.Compiler;
 import io.cdap.wrangler.api.Directive;
+import io.cdap.wrangler.api.RecipeException;
 import io.cdap.wrangler.api.RecipeParser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -74,5 +75,74 @@ public class GrammarBasedParserTest {
     List<Directive> directives = parser.parse();
     Assert.assertEquals(0, directives.size());
   }
+  @Test
+  public void testValidAggregateSizeTimeRecipe() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size :response_time :total_size_mb :total_time_sec " +
+                    "size-unit:MB time-unit:s time-agg:total"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    List<Directive> directives = parser.parse();
+    Assert.assertEquals(1, directives.size());
+  }
 
+  @Test
+  public void testValidAggregateSizeTimeMinimalRecipe() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size :response_time :total_size_mb :total_time_sec"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    List<Directive> directives = parser.parse();
+    Assert.assertEquals(1, directives.size());
+  }
+
+  @Test(expected = RecipeException.class)
+  public void testInvalidSizeUnit() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size :response_time :total_size_mb :total_time_sec" +
+                    " size-unit:XB time-unit:s time-agg:total"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    parser.parse();
+  }
+
+  @Test(expected = RecipeException.class)
+  public void testInvalidTimeUnit() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size :response_time :total_size_mb :total_time_sec" +
+                    " size-unit:MB time-unit:xs time-agg:total"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    parser.parse();
+  }
+
+  @Test(expected = RecipeException.class)
+  public void testInvalidAggType() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size " +
+                    ":response_time :total_size_mb :total_time_sec size-unit:MB time-unit:s time-agg:invalid"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    parser.parse();
+  }
+
+  @Test(expected = RecipeException.class)
+  public void testMissingRequiredArgument() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time :data_transfer_size :response_time :total_size_mb"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    parser.parse();
+  }
+
+  @Test
+  public void testFlexibleFormatting() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-size-time : DATA_TRANSFER_SIZE  : RESPONSE_TIME : TOTAL_SIZE_MB : " +
+                    "TOTAL_TIME_SEC  size-unit : mb time-unit : S  time-agg : AVERAGE"
+    };
+    RecipeParser parser = TestingRig.parse(recipe);
+    List<Directive> directives = parser.parse();
+    Assert.assertEquals(1, directives.size());
+  }
 }
